@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -8,7 +8,9 @@ import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down.js';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right.js';
 import Check from 'lucide-react/dist/esm/icons/check.js';
+import Menu from 'lucide-react/dist/esm/icons/menu.js';
 import MessageCircle from 'lucide-react/dist/esm/icons/message-circle.js';
+import XIcon from 'lucide-react/dist/esm/icons/x.js';
 import {
   Route,
   Switch,
@@ -62,11 +64,12 @@ function whatsappUrl(source: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`${WHATSAPP_MESSAGE} [${source}]`)}`;
 }
 
-function WhatsAppLink({ source, children, className = 'button', label }: {
+function WhatsAppLink({ source, children, className = 'button', label, onClick }: {
   source: string;
   children: ReactNode;
   className?: string;
   label: string;
+  onClick?: () => void;
 }) {
   return (
     <a
@@ -76,7 +79,10 @@ function WhatsAppLink({ source, children, className = 'button', label }: {
       rel="noopener noreferrer"
       aria-label={label}
       data-testid={`link-whatsapp-${source}`}
-      onClick={() => trackLead(source)}
+      onClick={() => {
+        trackLead(source);
+        onClick?.();
+      }}
     >
       {children}
     </a>
@@ -84,19 +90,61 @@ function WhatsAppLink({ source, children, className = 'button', label }: {
 }
 
 function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useScrollReveal();
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [mobileMenuOpen]);
 
   return (
     <main className="site-shell">
-      <header className="container topbar">
-        <a className="brand" href="#inicio" aria-label="Veloz Rent a Car, início" data-testid="link-home">
-          <img src="/images/veloz-logo.jpg" alt="Veloz Rent a Car" />
-        </a>
-        <nav className="topnav" aria-label="Navegação principal">
-          <a href="#como-funciona" data-testid="link-nav-como-funciona">Como funciona</a>
-          <a href="#valores" data-testid="link-nav-valores">Valores</a>
-          <a href="#duvidas" data-testid="link-nav-duvidas">Dúvidas</a>
-          <WhatsAppLink source="menu" label="Fale conosco pelo WhatsApp">Fale conosco <ArrowUpRight size={16} /></WhatsAppLink>
+      <header className="topbar">
+        <div className="container topbar-inner">
+          <a className="brand" href="#inicio" aria-label="Veloz Rent a Car, início" data-testid="link-home" onClick={() => setMobileMenuOpen(false)}>
+            <img src="/images/veloz-logo.jpg" alt="Veloz Rent a Car" />
+          </a>
+          <nav className="topnav" aria-label="Navegação principal">
+            <a href="#como-funciona" data-testid="link-nav-como-funciona">Como funciona</a>
+            <a href="#valores" data-testid="link-nav-valores">Valores</a>
+            <a href="#duvidas" data-testid="link-nav-duvidas">Dúvidas</a>
+            <WhatsAppLink source="menu" label="Fale conosco pelo WhatsApp">Fale conosco <ArrowUpRight size={16} /></WhatsAppLink>
+          </nav>
+          <button
+            type="button"
+            className="mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+            aria-controls="mobile-navigation"
+            aria-expanded={mobileMenuOpen}
+            data-testid="button-mobile-navigation-toggle"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? <XIcon size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        <nav
+          id="mobile-navigation"
+          className="mobile-nav"
+          aria-label="Navegação para celular"
+          hidden={!mobileMenuOpen}
+        >
+          <a href="#como-funciona" data-testid="link-mobile-nav-como-funciona" onClick={() => setMobileMenuOpen(false)}>Como funciona</a>
+          <a href="#valores" data-testid="link-mobile-nav-valores" onClick={() => setMobileMenuOpen(false)}>Valores</a>
+          <a href="#duvidas" data-testid="link-mobile-nav-duvidas" onClick={() => setMobileMenuOpen(false)}>Dúvidas</a>
+          <WhatsAppLink
+            source="mobile-menu"
+            label="Fale conosco pelo WhatsApp"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Fale conosco <ArrowUpRight size={16} />
+          </WhatsAppLink>
         </nav>
       </header>
 
