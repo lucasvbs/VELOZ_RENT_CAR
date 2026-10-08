@@ -4,7 +4,11 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, MessageCircle } from 'lucide-react';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down.js';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js';
+import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right.js';
+import Check from 'lucide-react/dist/esm/icons/check.js';
+import MessageCircle from 'lucide-react/dist/esm/icons/message-circle.js';
 import {
   Route,
   Switch,
